@@ -1,17 +1,14 @@
 import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 import { IUser } from '../../interfaces/IUser';
 import User from '../../models/User';
+import { encryptPassword } from '../shared';
 
-const saltRounds: number = 10;
+dotenv.config();
 
-const encryptPassword = async (password: string) => {
-  let newPassword: string = '';
-  await bcrypt.hash(password, saltRounds).then(function (hash: any) {
-    newPassword = hash;
-  });
-  return newPassword;
-};
+const secret: string = process.env.SECRET || '';
 
 export const getUser = async (req: Request, res: Response) => {
   let { id } = req.body;
@@ -25,9 +22,8 @@ export const getUser = async (req: Request, res: Response) => {
 };
 
 export const createUser = async (req: Request, res: Response) => {
+  console.log(secret);
   let { username, password }: IUser = req.body;
-
-  // Bcrypt
   password = await encryptPassword(password);
 
   const user = new User({
@@ -35,8 +31,19 @@ export const createUser = async (req: Request, res: Response) => {
     password,
   });
   try {
-    const response = await user.save();
-    res.status(201).send(response);
+    await user.save();
+
+    const payload = {
+      user: {
+        id: user.id,
+      },
+    };
+
+    jwt.sign(payload, secret, { expiresIn: 360000 }, (err, token) => {
+      if (err) throw err;
+      res.json({ token });
+    });
+    // res.status(201).send(user);
   } catch (error) {
     res.status(501).send({ message: 'message' });
   }

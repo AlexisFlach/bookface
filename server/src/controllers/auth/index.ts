@@ -11,6 +11,7 @@ const secret: string = process.env.SECRET || '';
 export const authenticate = async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.user?.id).select('-password');
+    if (!user) res.status(500).send('Server error');
     res.json(user);
   } catch (err) {
     console.error(err);

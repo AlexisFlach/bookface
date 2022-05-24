@@ -30,6 +30,7 @@ export const createUser = async (req: Request, res: Response) => {
     username,
     password,
   });
+  console.log(user);
   try {
     await user.save();
 
@@ -43,9 +44,9 @@ export const createUser = async (req: Request, res: Response) => {
       if (err) throw err;
       res.json({ token });
     });
-    // res.status(201).send(user);
-  } catch (error) {
-    res.status(501).send({ message: 'message' });
+    res.status(201).send(user);
+  } catch (error: any) {
+    res.status(501).send({ message: error.message });
   }
 };
 

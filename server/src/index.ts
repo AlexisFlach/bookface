@@ -16,3 +16,5 @@ app.use('/api/posts', PostRoutes);
 app.use('/api/auth', AuthRoutes);
 Configuration.connectToPort(app);
 Configuration.connectToDatabase().then();
+
+export default app;
